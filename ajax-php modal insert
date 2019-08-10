@@ -1,0 +1,143 @@
+---------------------------------------- index page ----------------------------------------
+ <!-- add code -->
+<script>
+  $(document).ready(function(){
+    $(document).on('click', '#add', function(){
+
+      var today = new Date();
+      var dd = String(today.getDate()).padStart(2, '0');
+      var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+      var yyyy = today.getFullYear();
+
+      today = mm + '/' + dd + '/' + yyyy;
+
+      $('#photo').show();
+      document.getElementById("photo").src = '';
+      $('#upload').show();
+
+      $('#action').val('add');
+
+      $('#id_row').hide();
+      $('#name').val(''); $('#name').removeAttr('readonly');
+      $('#entry').val(today); $('#entry').removeAttr('readonly');
+      $('#profession').val(''); $('#profession').removeAttr('readonly');
+
+      $('#height_row').hide();
+      $('#feet_row').show();
+      $('#inch_row').show();
+
+      $('#weight').val(''); $('#weight').removeAttr('readonly');
+      $('#age').val(''); $('#age').removeAttr('readonly');
+      $('#phone').val(''); $('#phone').removeAttr('readonly');
+      $('#email').val(''); $('#email').removeAttr('readonly');
+      $('#course').val(''); $('#course').removeAttr('disabled');
+      $('#membership').val(''); $('#membership').removeAttr('disabled');
+
+      $('#view_title').hide();
+      $('#edit_title').hide();
+      $('#add_title').hide();
+      $('#save_changes').hide();
+      $('#add_member').show();
+
+    });
+
+    $(document).on('click', '#add_member', function(){
+      var form = $('form')[0];
+      var formData = new FormData(form);
+      $.ajax({
+        url: 'member_ajax.php',
+        method: 'POST',
+        data: formData,
+        contentType: false,
+        cache: false,
+        processData: false,
+
+        success: function(){
+          window.location.href='members.php';
+        }
+      });
+    });
+  });
+</script>
+ <!-- add code -->
+ ---------------------------------------- index page ----------------------------------------
+ 
+ 
+ ---------------------------------------- member_ajax page ----------------------------------------
+ // add code
+if (isset($_POST['action']) && $_POST['action']=='add') {
+
+  $name = $_POST['name'];
+  $entry = $_POST['entry'];
+  $profession = $_POST['profession'];
+  $feet = $_POST['feet'];
+  $inch = $_POST['inch'];
+  $weight = $_POST['weight'];
+  $age = $_POST['age'];
+  $mobile = $_POST['phone'];
+  $email = $_POST['email'];
+  $course = $_POST['course'];
+  $membership = $_POST['membership'];
+
+   //favicon
+   $favicon = $_FILES['new_photo'];
+   $favName = $_FILES['new_photo']['name'];
+   $favTempName = $_FILES['new_photo']['tmp_name'];
+   $favSize = $_FILES['new_photo']['size'];
+   $favError = $_FILES['new_photo']['error'];
+   $favType = $_FILES['new_photo']['type'];
+
+   $fileExt = explode('.', $favName);
+   $fileActualExt = strtolower(end($fileExt));
+
+   $unique_image = md5(time());
+   $unique_image = substr($unique_image, 0, 10) . '.' . $fileActualExt;
+
+   $allowed = array( 'jpg', 'jpeg', 'png' );
+
+   if (!empty($favName)) {
+     if ( in_array($fileActualExt, $allowed) ) {
+       if ( $favError === 0 ) {
+
+         $fileDestination = '../uploads/member_photo/'.$unique_image;
+         $photoDestination = 'uploads/member_photo/'.$unique_image;
+
+         move_uploaded_file($favTempName, $fileDestination);
+       }
+     }
+   } else{
+    $photoDestination = '';
+   }
+   //favicon
+
+   $sql = "INSERT INTO member_data(
+     regi_date,
+     photo,
+     name,
+     profession,
+     height_feet,
+     height_inch,
+     weight,
+     age,
+     mobile,
+     email,
+     course,
+     membership_type) VALUES(
+       '$entry',
+       '$photoDestination',
+       '$name',
+       '$profession',
+       '$feet',
+       '$inch',
+       '$weight',
+       '$age',
+       '$mobile',
+       '$email',
+       '$course',
+       '$membership'
+     )";
+
+  $result = mysqli_query($conn, $sql);
+}
+// add code
+ ---------------------------------------- member_ajax page ----------------------------------------
