@@ -1,0 +1,184 @@
+--------------------------------------------- index page -----------------------------------------------
+<!-- edit code -->
+<script>
+$(document).ready(function(){
+     $(document).on('click', '#edit', function(){
+          var edit_id = $(this).data("edit");
+          $.ajax({
+               url:"member_ajax.php",
+               method:"post",
+               dataType: "json",
+               data:{edit_id:edit_id},
+               success:function(data){
+                 $('#photo').show();
+                 document.getElementById("photo").src = "../"+data.photo;
+                 $('#upload').show();
+
+                 $('#id_row').show();
+                 $('#id').html(data.id);
+                 $('#hidden_id').val(data.id);
+                 $('#action').val('edit');
+
+                 $('#name').val(data.name);
+                 $('#name').removeAttr('readonly');
+                 $('#entry').val(data.regi_date);
+                 $('#entry').removeAttr('readonly');
+                 $('#profession').val(data.profession);
+                 $('#profession').removeAttr('readonly');
+
+
+                 $('#height_row').hide();
+                 $('#feet_row').show();
+                 $('#feet').val(data.height_feet);
+                 $('#inch_row').show();
+                 $('#inch').val(data.height_inch);
+                 $('#weight').val(data.weight);
+                 $('#weight').removeAttr('readonly');
+                 $('#age').val(data.age);
+                 $('#age').removeAttr('readonly');
+                 $('#phone').val(data.mobile);
+                 $('#phone').removeAttr('readonly');
+                 $('#email').val(data.email);
+                 $('#email').removeAttr('readonly');
+                 $('#course').val(data.course);
+                 $('#course').removeAttr('disabled');
+                 $('#membership').val(data.membership_type);
+                 $('#membership').removeAttr('disabled');
+
+                 $('#view_title').hide();
+                 $('#add_title').hide();
+                 $('#edit_title').show();
+
+                 $('#save_changes').show();
+                 $('#add_member').hide();
+               }
+          });
+     });
+
+    $(document).on('click', '#save_changes', function(){
+      var form = $('form')[0];
+      var formData = new FormData(form);
+      $.ajax({
+        url: 'member_ajax.php',
+        method: 'POST',
+        data: formData,
+        contentType: false,
+        cache: false,
+        processData: false,
+
+        success: function(){
+          window.location.href='members.php';
+        }
+      });
+    });
+});
+</script>
+<!-- edit code -->
+--------------------------------------------- index page -----------------------------------------------
+
+
+
+--------------------------------------------- member_ajax page -----------------------------------------------
+// edit code
+if (isset($_POST['edit_id'])) {
+  $edit_id = $_POST['edit_id'];
+  $sql = "SELECT * FROM member_data WHERE id='$edit_id';";
+  $result = mysqli_query($conn, $sql);
+  $row = mysqli_fetch_array($result);
+
+  echo json_encode($row);
+}
+
+if (isset($_POST['action']) && $_POST['action']=='edit') {
+  $hidden_id = $_POST['hidden_id'];
+  $name = $_POST['name'];
+  $entry = $_POST['entry'];
+  $profession = $_POST['profession'];
+  $feet = $_POST['feet'];
+  $inch = $_POST['inch'];
+  $weight = $_POST['weight'];
+  $age = $_POST['age'];
+  $mobile = $_POST['phone'];
+  $email = $_POST['email'];
+  $course = $_POST['course'];
+  $membership = $_POST['membership'];
+
+  //favicon
+  $favicon = $_FILES['new_photo'];
+  $favName = $_FILES['new_photo']['name'];
+  $favTempName = $_FILES['new_photo']['tmp_name'];
+  $favSize = $_FILES['new_photo']['size'];
+  $favError = $_FILES['new_photo']['error'];
+  $favType = $_FILES['new_photo']['type'];
+
+  $fileExt = explode('.', $favName);
+  $fileActualExt = strtolower(end($fileExt));
+
+  $unique_image = md5(time());
+  $unique_image = substr($unique_image, 0, 10) . '.' . $fileActualExt;
+
+  $allowed = array( 'jpg', 'jpeg', 'png' );
+
+  if (!empty($favName)) {
+    if ( in_array($fileActualExt, $allowed) ) {
+      if ( $favError === 0 ) {
+
+        $fileDestination = '../uploads/member_photo/'.$unique_image;
+        $photoDestination = 'uploads/member_photo/'.$unique_image;
+
+        move_uploaded_file($favTempName, $fileDestination);
+
+        // deleting old photo
+        $sql = "SELECT * FROM member_data;";
+        $result = mysqli_query($conn, $sql);
+        $result_check = mysqli_num_rows($result);
+        if( $result_check > 0 ){
+          while ($row = mysqli_fetch_assoc($result)) {
+              if ($row['id']==$hidden_id) {
+                $old_photo = '../'.$row['photo'];
+              }
+          }
+        }
+        unlink($old_photo);
+        // deleting old photo
+
+        $sql = "UPDATE member_data SET
+        regi_date='$entry',
+        photo='$photoDestination',
+        name='$name',
+        profession='$profession',
+        height_feet='$feet',
+        height_inch='$inch',
+        weight='$weight',
+        age='$age',
+        mobile='$mobile',
+        email='$email',
+        course='$course',
+        membership_type='$membership'
+        WHERE id='$hidden_id';";
+
+      }
+    }
+  } else{
+
+    $sql = "UPDATE member_data SET
+    regi_date='$entry',
+    name='$name',
+    profession='$profession',
+    height_feet='$feet',
+    height_inch='$inch',
+    weight='$weight',
+    age='$age',
+    mobile='$mobile',
+    email='$email',
+    course='$course',
+    membership_type='$membership'
+    WHERE id='$hidden_id';";
+
+  }
+  //favicon
+
+  $result = mysqli_query($conn, $sql);
+}
+// edit code
+--------------------------------------------- member_ajax page -----------------------------------------------
