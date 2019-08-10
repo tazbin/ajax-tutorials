@@ -1,0 +1,63 @@
+-------------------------------- index file ------------------------------------
+<!-- view code -->
+<script>
+$(document).ready(function(){
+     $(document).on('click', '#view', function(){
+          var view_id = $(this).data("view");
+          console.log(view_id);
+          $.ajax({
+               url:"member_ajax.php",
+               method:"post",
+               dataType: "json",
+               data:{view_id:view_id},
+               success:function(data){
+
+                 $('#photo').show();
+                 document.getElementById("photo").src = "../"+data.photo;
+                 $('#upload').hide();
+
+                 $('#id').html(data.id);
+                 $('#name').val(data.name); $('#name').attr('readonly', '');
+                 $('#entry').val(data.regi_date); $('#entry').attr('readonly', '');
+                 $('#profession').val(data.profession); $('#profession').attr('readonly', '');
+
+                 $('#id_row').show();
+                 $('#height_row').show();
+                 $('#height').val(data.height_feet+'" '+data.height_inch+"'"); $('#height').attr('readonly', '');
+                 $('#feet_row').hide();
+                 $('#inch_row').hide();
+
+                 $('#weight').val(data.weight+" lbs"); $('#weight').attr('readonly', '');
+                 $('#age').val(data.age+" yrs"); $('#age').attr('readonly', '');
+                 $('#phone').val(data.mobile); $('#phone').attr('readonly', '');
+                 $('#email').val(data.email); $('#email').attr('readonly', '');
+                 $('#course').val(data.course); $('#course').attr('disabled', '');
+                 $('#membership').val(data.membership_type); $('#membership').attr('disabled', '');
+
+                 $('#view_title').show();
+                 $('#edit_title').hide();
+                 $('#add_title').hide();
+                 $('#save_changes').hide();
+                 $('#add_member').hide();
+               }
+          });
+     });
+});
+</script>
+<!-- view code -->
+-------------------------------- index file ------------------------------------
+
+
+
+-------------------------------- member_ajax file ------------------------------------
+// view code
+if (isset($_POST['view_id'])) {
+  $view_id = $_POST['view_id'];
+  $sql = "SELECT * FROM member_data WHERE id='$view_id';";
+  $result = mysqli_query($conn, $sql);
+  $row = mysqli_fetch_array($result);
+
+  echo json_encode($row);
+}
+// view code
+-------------------------------- member_ajax file ------------------------------------
